@@ -1,6 +1,8 @@
 # DCID SDK Examples
 
-This directory contains complete example applications demonstrating the DCID SDK across different platforms.
+This repository contains complete example applications demonstrating the DCID SDK across different platforms.
+
+> **Note:** These examples require the [DCID SDK](../dcid-sdk). Make sure you have the SDK installed before running the examples.
 
 ## Examples
 
@@ -63,20 +65,21 @@ Each example references the SDK locally via `"@dcid/sdk": "file:../../dcid-sdk"`
 
 ### Prerequisites
 
-1. **Build the SDK first:**
+1. **Clone and build the SDK first:**
    ```bash
-   cd ..
+   # From the parent directory (e.g., tracr/)
+   cd dcid-sdk
    npm install
    npm run build
    ```
 
 2. **Navigate to an example:**
    ```bash
-   cd examples/web-app
+   cd ../dcid-sdk-examples/web-app
    # or
-   cd examples/browser-extension
+   cd ../dcid-sdk-examples/browser-extension
    # or
-   cd examples/react-native-app
+   cd ../dcid-sdk-examples/react-native-app
    ```
 
 3. **Install dependencies:**
