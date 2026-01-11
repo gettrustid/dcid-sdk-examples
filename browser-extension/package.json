@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@dcid/sdk": "file:../../dcid-sdk",
+    "axios": "^1.13.2",
     "centrifuge": "^5.5.2",
     "metakeep": "file:../../dcid-sdk/metakeep-2.2.8.tgz",
     "react": "^18.3.1",

@@ -8,20 +8,24 @@ export default defineConfig({
     react(),
     {
       name: 'copy-extension-files',
-      closeBundle() {
+      writeBundle() {
+        const srcDir = resolve(__dirname);
+        const distDir = resolve(__dirname, 'dist');
+        // Ensure dist directory exists
+        mkdirSync(distDir, { recursive: true });
         // Copy manifest.json
-        copyFileSync('manifest.json', 'dist/manifest.json');
+        copyFileSync(resolve(srcDir, 'manifest.json'), resolve(distDir, 'manifest.json'));
         // Copy offscreen.html
-        copyFileSync('offscreen.html', 'dist/offscreen.html');
+        copyFileSync(resolve(srcDir, 'offscreen.html'), resolve(distDir, 'offscreen.html'));
         // Create icons directory and copy icons
-        mkdirSync('dist/icons', { recursive: true });
-        copyFileSync('icons/icon16.jpeg', 'dist/icons/icon16.jpeg');
-        copyFileSync('icons/icon32.jpeg', 'dist/icons/icon32.jpeg');
-        copyFileSync('icons/icon48.jpeg', 'dist/icons/icon48.jpeg');
-        copyFileSync('icons/icon128.jpeg', 'dist/icons/icon128.jpeg');
+        mkdirSync(resolve(distDir, 'icons'), { recursive: true });
+        copyFileSync(resolve(srcDir, 'icons/icon16.jpeg'), resolve(distDir, 'icons/icon16.jpeg'));
+        copyFileSync(resolve(srcDir, 'icons/icon32.jpeg'), resolve(distDir, 'icons/icon32.jpeg'));
+        copyFileSync(resolve(srcDir, 'icons/icon48.jpeg'), resolve(distDir, 'icons/icon48.jpeg'));
+        copyFileSync(resolve(srcDir, 'icons/icon128.jpeg'), resolve(distDir, 'icons/icon128.jpeg'));
         // Copy circuits from SDK package dist
-        const circuitsSource = resolve(__dirname, '../../dist/circuits');
-        cpSync(circuitsSource, 'dist/circuits', { recursive: true });
+        const circuitsSource = resolve(__dirname, '../../dcid-sdk/dist/circuits');
+        cpSync(circuitsSource, resolve(distDir, 'circuits'), { recursive: true });
         console.log('[Extension] Copied circuit files from SDK');
       },
     },
@@ -34,6 +38,16 @@ export default defineConfig({
         content: resolve(__dirname, 'src/content.ts'),
         offscreen: resolve(__dirname, 'src/offscreen.ts'),
       },
+      external: [
+        // React Native modules (not available in browser extension)
+        'react-native-fs',
+        'react-native-mmkv',
+        'react-native',
+        '@react-native-async-storage/async-storage',
+        'react-native-keychain',
+        'react-native-device-info',
+        'react-native-jailbreak-detection',
+      ],
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: (chunkInfo) => {

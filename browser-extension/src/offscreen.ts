@@ -281,8 +281,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if (!existingIdentity) {
             throw new Error('No identity found. Please create an identity first.');
           }
-          const accessToken = await client.auth.getAccessToken();
-          // const credentials = await credentialManager.getCredentials(userEmail, existingIdentity.did, accessToken || undefined);
+          // Get credentials from local storage
           const credentials = await credentialManager.getRawCredentialRecords();
           sendResponse({
             success: true,

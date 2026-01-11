@@ -6,6 +6,7 @@ interface DCIDContextType {
   client: DCIDClient | null;
   isAuthenticated: boolean;
   userEmail: string | null;
+  userDID: string | null;
   isLoading: boolean;
   hasIdentity: boolean;
   refreshAuthState: (loginEmail?: string) => void;
@@ -18,6 +19,7 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<DCIDClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userDID, setUserDID] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasIdentity, setHasIdentity] = useState(false);
 
@@ -41,6 +43,7 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
   const checkIdentity = async () => {
     if (!client || !isAuthenticated) {
       setHasIdentity(false);
+      setUserDID(null);
       return;
     }
 
@@ -49,18 +52,22 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
         userEmail || (typeof window !== 'undefined' ? localStorage.getItem('dcid_user_email') : null);
       if (!email) {
         setHasIdentity(false);
+        setUserDID(null);
         return;
       }
 
       if (!client.identity) {
         setHasIdentity(false);
+        setUserDID(null);
         return;
       }
 
       const identity = await client.identity.getExistingIdentity();
       setHasIdentity(!!identity?.did);
+      setUserDID(identity?.did || null);
     } catch (error) {
       setHasIdentity(false);
+      setUserDID(null);
     }
   };
 
@@ -140,6 +147,7 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
         client,
         isAuthenticated,
         userEmail,
+        userDID,
         isLoading,
         hasIdentity,
         refreshAuthState,

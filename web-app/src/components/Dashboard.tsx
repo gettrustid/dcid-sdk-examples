@@ -27,7 +27,7 @@ function Dashboard() {
             )}
           </p>
         </div>
-        <button onClick={handleLogout} className="secondary">
+        <button onClick={handleLogout} className="secondary small">
           Logout
         </button>
       </div>

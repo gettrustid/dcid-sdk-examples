@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { dcidWebPlugin } from '@dcid/sdk/vite-plugin-web';
 import { resolve } from 'path';
 import { cpSync, mkdirSync, existsSync } from 'fs';
 
 // Circuits are bundled with the SDK package
-const circuitsSource = resolve(__dirname, '../../dist/circuits');
+const circuitsSource = resolve(__dirname, '../../dcid-sdk/dist/circuits');
 
 function copyCircuits(targetDir: string) {
   try {
@@ -23,6 +24,7 @@ function copyCircuits(targetDir: string) {
 export default defineConfig({
   plugins: [
     react(),
+    dcidWebPlugin(),
     {
       name: 'copy-circuits',
       buildStart() {
