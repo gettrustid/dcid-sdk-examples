@@ -30,6 +30,7 @@ export const messages = {
   getIdentity: () => sendMessage('GET_IDENTITY'),
   createIdentity: () => sendMessage('CREATE_IDENTITY'),
   getCredentials: () => sendMessage('GET_CREDENTIALS'),
+  getDecryptedCredentials: () => sendMessage('GET_DECRYPTED_CREDENTIALS'),
   issueCredential: (credentialType: string, credentialData: Record<string, any>) =>
     sendMessage('ISSUE_CREDENTIAL', { credentialType, credentialData }),
   createProof: (proofRequestUrl: string) => sendMessage('CREATE_PROOF', { proofRequestUrl }),

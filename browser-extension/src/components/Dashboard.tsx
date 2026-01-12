@@ -7,6 +7,71 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
+// Helper to unwrap credential if it's wrapped in vc/credential field
+function unwrapCredential(cred: any): any {
+  // Check for common wrapper patterns
+  if (cred.vc) return cred.vc;
+  if (cred.credential) return cred.credential;
+  if (cred.verifiableCredential) return cred.verifiableCredential;
+  return cred;
+}
+
+// Helper to extract credential type from various formats
+function getCredentialType(rawCred: any): string {
+  const cred = unwrapCredential(rawCred);
+
+  // Direct type string (our metadata format)
+  if (typeof cred.type === 'string' && cred.type !== 'VerifiableCredential') {
+    return cred.type;
+  }
+
+  // Try standard W3C type array
+  if (Array.isArray(cred.type)) {
+    const specificType = cred.type.find((t: string) => t !== 'VerifiableCredential');
+    if (specificType) return specificType;
+  }
+
+  // Try credentialSubject.type (PolygonID format)
+  if (cred.credentialSubject?.type) {
+    return cred.credentialSubject.type;
+  }
+
+  // Try credentialSchema (extract type from schema URL)
+  if (cred.credentialSchema?.id) {
+    const schemaUrl = cred.credentialSchema.id;
+    const match = schemaUrl.match(/\/([^/]+?)(?:\.json)?$/);
+    if (match) return match[1];
+  }
+
+  // Try @type field
+  if (cred['@type']) {
+    const atType = cred['@type'];
+    if (Array.isArray(atType)) {
+      return atType.find((t: string) => t !== 'VerifiableCredential') || atType[0];
+    }
+    return atType;
+  }
+
+  return 'Unknown Credential';
+}
+
+
+function isPopup(): boolean {
+  return window.location.pathname.includes('popup.html');
+}
+
+function openInTab() {
+  const popupUrl = chrome.runtime.getURL('popup.html');
+  window.open(popupUrl, '_blank');
+}
+
+function isSessionExpiredError(error: string | undefined): boolean {
+  if (!error) return false;
+  const lowerError = error.toLowerCase();
+  const sessionErrors = ['login first', 'email not available', 'not authenticated', 'session expired', 'failed to refresh', 'status code 401', 'unauthorized'];
+  return sessionErrors.some(msg => lowerError.includes(msg));
+}
+
 function Dashboard({ userEmail, onLogout }: DashboardProps) {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [credentials, setCredentials] = useState<Credential[]>([]);
@@ -20,6 +85,19 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
   const [success, setSuccess] = useState<string | null>(null);
   const [proofResult, setProofResult] = useState<any>(null);
   const [recoveryResult, setRecoveryResult] = useState<{ count: number } | null>(null);
+  const [inPopup] = useState(isPopup());
+  const [decryptedCredentials, setDecryptedCredentials] = useState<any[] | null>(null);
+  const [viewingCredential, setViewingCredential] = useState<number | null>(null);
+  const [decryptLoading, setDecryptLoading] = useState(false);
+
+  const handleSessionExpired = async () => {
+    console.log('[Dashboard] Session expired, forcing logout...');
+    setError('Session expired. Redirecting to login...');
+    setActionLoading(false);
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    await messages.logout(); 
+    onLogout(); 
+  };
 
   useEffect(() => {
     loadData();
@@ -28,22 +106,63 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
   const loadData = async () => {
     setLoading(true);
     console.log('[Dashboard] Loading identity from IndexedDB...');
+
+    let currentIdentity = null;
+
     const identityResponse = await messages.getIdentity();
     if (identityResponse.success) {
       if (identityResponse.data) {
         console.log('[Dashboard] ✅ Identity loaded:', identityResponse.data.did.substring(0, 30) + '...');
+        currentIdentity = identityResponse.data;
       } else {
-        console.log('[Dashboard] No identity found - user needs to create one');
+        // Auto-create identity for new users
+        console.log('[Dashboard] No identity found - auto-creating...');
+        const createResponse = await messages.createIdentity();
+        if (createResponse.success) {
+          console.log('[Dashboard] ✅ Identity auto-created:', createResponse.data.did.substring(0, 30) + '...');
+          currentIdentity = createResponse.data;
+        } else {
+          if (isSessionExpiredError(createResponse.error)) {
+            handleSessionExpired();
+            return;
+          }
+          console.error('[Dashboard] Failed to auto-create identity:', createResponse.error);
+          setError('Failed to create identity: ' + createResponse.error);
+        }
       }
-      setIdentity(identityResponse.data);
-      if (identityResponse.data?.did) {
+
+      setIdentity(currentIdentity);
+
+      // Load credentials if we have an identity
+      if (currentIdentity?.did) {
         const credsResponse = await messages.getCredentials();
         if (credsResponse.success) {
           setCredentials(credsResponse.data || []);
           console.log('[Dashboard] Loaded', credsResponse.data?.length || 0, 'credentials');
+          // Debug: log all credential structures
+          credsResponse.data?.forEach((cred: any, i: number) => {
+            console.log(`[Dashboard] Credential ${i}:`, {
+              keys: Object.keys(cred),
+              type: cred.type,
+              credentialSubjectType: cred.credentialSubject?.type,
+              schemaId: cred.credentialSchema?.id,
+              issuanceDate: cred.issuanceDate,
+              vc: cred.vc ? Object.keys(cred.vc) : undefined,
+            });
+          });
+        } else {
+          console.log('[Dashboard] GET_CREDENTIALS failed:', credsResponse.error);
+          if (isSessionExpiredError(credsResponse.error)) {
+            handleSessionExpired();
+            return;
+          }
         }
       }
     } else {
+      if (isSessionExpiredError(identityResponse.error)) {
+        handleSessionExpired();
+        return;
+      }
       console.error('[Dashboard] Failed to load identity:', identityResponse.error);
     }
     setLoading(false);
@@ -63,6 +182,10 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
       setSuccess('Identity created successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } else {
+      if (isSessionExpiredError(response.error)) {
+        handleSessionExpired();
+        return;
+      }
       console.error('[Dashboard] Failed to create identity:', response.error);
       setError(response.error || 'Failed to create identity');
     }
@@ -125,6 +248,10 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
       setTimeout(() => setSuccess(null), 3000);
       await loadData();
     } else {
+      if (isSessionExpiredError(response.error)) {
+        handleSessionExpired();
+        return;
+      }
       console.error('[Dashboard] Failed to issue credential:', response.error);
       setError(response.error || 'Failed to issue credential');
     }
@@ -147,6 +274,10 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
       setSuccess('Credential verified successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } else {
+      if (isSessionExpiredError(response.error)) {
+        handleSessionExpired();
+        return;
+      }
       console.error('[Dashboard] Failed to verify credential:', response.error);
       setError(response.error || 'Failed to create proof');
     }
@@ -155,6 +286,39 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
   const handleLogout = async () => {
     await messages.logout();
     onLogout();
+  };
+
+  const handleViewCredential = async (index: number) => {
+    if (viewingCredential === index) {
+      setViewingCredential(null);
+      return;
+    }
+
+    if (decryptedCredentials && decryptedCredentials[index]) {
+      setViewingCredential(index);
+      return;
+    }
+
+    // Need to decrypt all credentials
+    setError(null);
+    setDecryptLoading(true);
+    console.log('[Dashboard] Loading decrypted credentials...');
+
+    const response = await messages.getDecryptedCredentials();
+    setDecryptLoading(false);
+
+    if (response.success) {
+      console.log('[Dashboard] ✅ Decrypted credentials loaded:', response.data?.length);
+      setDecryptedCredentials(response.data || []);
+      setViewingCredential(index);
+    } else {
+      if (isSessionExpiredError(response.error)) {
+        handleSessionExpired();
+        return;
+      }
+      console.error('[Dashboard] Failed to decrypt credentials:', response.error);
+      setError(response.error || 'Failed to decrypt credentials');
+    }
   };
 
   const handleRecoverCredentials = async () => {
@@ -174,6 +338,10 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
       setTimeout(() => setSuccess(null), 5000);
       await loadData(); // Reload credentials to show recovered ones
     } else {
+      if (isSessionExpiredError(response.error)) {
+        handleSessionExpired();
+        return;
+      }
       console.error('[Dashboard] Failed to recover credentials:', response.error);
       setError(response.error || 'Failed to recover credentials');
     }
@@ -186,9 +354,16 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
           <strong>{userEmail}</strong>
           {identity?.did && <span className="success">Identity Active</span>}
         </div>
-        <button onClick={handleLogout} className="secondary small">
-          Logout
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {inPopup && (
+            <button onClick={openInTab} className="secondary small" title="Open in new tab to prevent popup from closing during MetaKeep sign">
+              ↗ Tab
+            </button>
+          )}
+          <button onClick={handleLogout} className="secondary small">
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="tabs">
@@ -234,10 +409,6 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
                     <label>DID</label>
                     <code>{identity.did}</code>
                   </div>
-                  <div className="info-item">
-                    <label>Public Key</label>
-                    <code>{identity.publicKey || 'Loading...'}</code>
-                  </div>
                 </div>
               ) : (
                 <div>
@@ -263,14 +434,69 @@ function Dashboard({ userEmail, onLogout }: DashboardProps) {
                   </div>
                 ) : (
                   <div className="credential-list">
-                    {credentials.map((cred) => {
-                      const type = Array.isArray(cred.type)
-                        ? cred.type.find((t) => t !== 'VerifiableCredential')
-                        : cred.type;
+                    {credentials.map((cred, index) => {
+                      const type = getCredentialType(cred);
+                      // Show "Credential 1", "Credential 2" for unknown types
+                      const displayType = type === 'Unknown Credential'
+                        ? `Credential ${index + 1}`
+                        : type;
+                      const isViewing = viewingCredential === index;
+                      const decrypted = decryptedCredentials?.[index];
+
                       return (
-                        <div key={cred.id} className="credential-card">
-                          <strong>{type}</strong>
-                          <small>Issued: {new Date(cred.issuanceDate).toLocaleDateString()}</small>
+                        <div key={cred.id || `cred-${index}`} className="credential-card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <strong>{displayType}</strong>
+                            <button
+                              className="secondary small"
+                              onClick={() => handleViewCredential(index)}
+                              disabled={decryptLoading}
+                            >
+                              {decryptLoading && viewingCredential === null ? 'Decrypting...' : isViewing ? 'Hide' : 'View'}
+                            </button>
+                          </div>
+
+                          {isViewing && decrypted && (
+                            <div style={{ marginTop: '0.75rem', fontSize: '0.8rem' }}>
+                              <div className="info-item" style={{ marginBottom: '0.5rem' }}>
+                                <label style={{ fontSize: '0.7rem' }}>Type</label>
+                                <code style={{ fontSize: '0.75rem' }}>
+                                  {Array.isArray(decrypted.type)
+                                    ? decrypted.type.find((t: string) => t !== 'VerifiableCredential') || decrypted.type[0]
+                                    : decrypted.type}
+                                </code>
+                              </div>
+
+                              {decrypted.issuanceDate && (
+                                <div className="info-item" style={{ marginBottom: '0.5rem' }}>
+                                  <label style={{ fontSize: '0.7rem' }}>Issued</label>
+                                  <code style={{ fontSize: '0.75rem' }}>
+                                    {new Date(decrypted.issuanceDate).toLocaleDateString()}
+                                  </code>
+                                </div>
+                              )}
+
+                              {decrypted.issuer && (
+                                <div className="info-item" style={{ marginBottom: '0.5rem' }}>
+                                  <label style={{ fontSize: '0.7rem' }}>Issuer</label>
+                                  <code style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+                                    {typeof decrypted.issuer === 'string'
+                                      ? decrypted.issuer
+                                      : decrypted.issuer?.id || JSON.stringify(decrypted.issuer)}
+                                  </code>
+                                </div>
+                              )}
+
+                              {decrypted.credentialSubject && (
+                                <div className="info-item">
+                                  <label style={{ fontSize: '0.7rem' }}>Subject</label>
+                                  <pre style={{ fontSize: '0.7rem', maxHeight: '150px', overflow: 'auto' }}>
+                                    {JSON.stringify(decrypted.credentialSubject, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

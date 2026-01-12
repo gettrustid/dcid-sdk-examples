@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import { messages } from './messaging';
+import { useMKHandler } from './hooks/useMK';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useMKHandler();
 
   const refreshAuthState = async () => {
     const response = await messages.getAuthState();

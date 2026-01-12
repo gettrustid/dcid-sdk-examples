@@ -5,12 +5,22 @@ interface LoginProps {
   onLogin: () => void;
 }
 
+function isPopup(): boolean {
+  return window.location.pathname.includes('popup.html') && window.innerWidth <= 450;
+}
+
+function openInTab() {
+  const popupUrl = chrome.runtime.getURL('popup.html');
+  window.open(popupUrl, '_blank');
+}
+
 function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inPopup] = useState(isPopup());
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +54,13 @@ function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="card">
+      {inPopup && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <button onClick={openInTab} className="secondary small" title="Open in new tab for better experience">
+            ↗ Tab
+          </button>
+        </div>
+      )}
       {step === 'email' ? (
         <form onSubmit={handleSendCode}>
           <div className="form-group">

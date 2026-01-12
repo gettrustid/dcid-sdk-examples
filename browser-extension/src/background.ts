@@ -12,6 +12,7 @@ let creatingOffscreen: Promise<void> | null = null;
 let activeContentScriptTabId: number | null = null; // Track which tab is performing credential operations (userportal pattern)
 const contentReadyTabs: Set<number> = new Set();
 let mtpWebSocket: MTPCredentialWebSocket | null = null;
+let popupTabId: number | null = null; // Track popup opened as tab for direct MetaKeep handling
 
 const METAKEEP_SIGNING_APP_ID = import.meta.env.VITE_DCID_SIGNING_APP_ID
 const METAKEEP_ENCRYPTION_APP_ID = import.meta.env.VITE_DCID_ENCRYPTION_APP_ID
@@ -161,6 +162,10 @@ chrome.tabs.onRemoved.addListener((tabId) => {
     console.log('[Background] Tracked content script tab was closed');
     activeContentScriptTabId = null;
   }
+  if (popupTabId === tabId) {
+    console.log('[Background] Popup tab was closed');
+    popupTabId = null;
+  }
   contentReadyTabs.delete(tabId);
 });
 
@@ -171,6 +176,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Handle offscreen ready
       if (message.type === 'OFFSCREEN_READY') {
         console.log('[Background] Offscreen ready');
+        sendResponse({ success: true });
+        return;
+      }
+
+      // Handle popup tab ready (for direct MetaKeep handling)
+      if (message.type === 'POPUP_TAB_READY') {
+        // Use tabId from message (extension pages) or sender.tab.id (content scripts)
+        const tabId = message.tabId || sender.tab?.id;
+        if (tabId) {
+          popupTabId = tabId;
+          console.log('[Background] Popup tab registered for MetaKeep:', popupTabId);
+        } else {
+          console.log('[Background] POPUP_TAB_READY received but no tabId (running in popup window)');
+        }
         sendResponse({ success: true });
         return;
       }
@@ -221,6 +240,59 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             status: error.response?.status,
             data: error.response?.data,
           });
+        }
+        return;
+      }
+
+      // Handle opening extension in a new tab
+      if (message.type === 'OPEN_TAB') {
+        const openTabWithRetry = async (url: string, retries = 3): Promise<void> => {
+          for (let i = 0; i < retries; i++) {
+            try {
+              await chrome.tabs.create({ url });
+              return;
+            } catch (error) {
+              console.warn(`[Background] Tab create attempt ${i + 1} failed:`, error);
+              if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+              }
+            }
+          }
+          throw new Error('Failed to open tab after retries');
+        };
+
+        try {
+          await openTabWithRetry(message.url);
+          sendResponse({ success: true });
+        } catch (error: any) {
+          console.error('[Background] Failed to open tab:', error);
+          sendResponse({ success: false, error: error.message });
+        }
+        return;
+      }
+
+      // Handle storage access from offscreen document
+      if (message.type === 'STORAGE_GET') {
+        try {
+          const key = message.key as string;
+          const result = await chrome.storage.local.get(key);
+          sendResponse({ success: true, data: result[key] });
+        } catch (error: any) {
+          console.error('[Background] Storage get error:', error);
+          sendResponse({ success: false, error: error.message });
+        }
+        return;
+      }
+
+      if (message.type === 'STORAGE_SET') {
+        try {
+          const key = message.key as string;
+          const value = message.value as string;
+          await chrome.storage.local.set({ [key]: value });
+          sendResponse({ success: true });
+        } catch (error: any) {
+          console.error('[Background] Storage set error:', error);
+          sendResponse({ success: false, error: error.message });
         }
         return;
       }
@@ -279,21 +351,94 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
-      // Route MetaKeep operations to content script (userportal pattern)
+      // Route MetaKeep operations to popup tab (preferred) or content script (fallback)
       if (message.type === 'METAKEEP_GET_PUBLIC_KEY' ||
           message.type === 'METAKEEP_SIGN' ||
           message.type === 'METAKEEP_DECRYPT') {
+
+        // First try: use popup tab if available (allows MetaKeep in extension tab)
+        if (popupTabId) {
+          try {
+            const tab = await chrome.tabs.get(popupTabId);
+            if (tab) {
+              console.log(`[Background] Routing ${message.type} to popup tab via runtime:`, popupTabId);
+
+              // SDK now sends metakeepAppId and metakeepEnv in the message
+              const isDecrypt = message.type === 'METAKEEP_DECRYPT';
+              const metakeepRequest = {
+                ...message,
+                __routedByBackground: true, // Mark as routed so popup knows to handle it
+                metakeepAppId: message.metakeepAppId || (isDecrypt ? METAKEEP_ENCRYPTION_APP_ID : METAKEEP_SIGNING_APP_ID),
+                metakeepEnv: message.metakeepEnv || (isDecrypt ? METAKEEP_ENCRYPTION_ENV : METAKEEP_SIGNING_ENV),
+              };
+
+              // Use chrome.runtime.sendMessage for extension pages (popup.html in tab)
+              // chrome.tabs.sendMessage only works for content scripts
+              chrome.runtime.sendMessage(metakeepRequest, (response) => {
+                if (chrome.runtime.lastError) {
+                  console.error('[Background] Popup tab MetaKeep failed, clearing:', chrome.runtime.lastError);
+                  popupTabId = null;
+                  // Will retry via content script on next attempt
+                  sendResponse({ success: false, error: 'Popup tab not responding. Please try again.' });
+                } else {
+                  sendResponse(response);
+                }
+              });
+              return true;
+            }
+          } catch (e) {
+            console.log('[Background] Popup tab no longer valid, falling back to content script');
+            popupTabId = null;
+          }
+        }
+
+        // Fallback: use content script in a webpage tab
         console.log(`[Background] Routing ${message.type} to content script tab:`, activeContentScriptTabId);
 
-        if (!activeContentScriptTabId) {
-          console.error('[Background] No active content script tab for MetaKeep operation');
-          sendResponse({ success: false, error: 'No active content script tab. Please initiate the operation from a webpage.' });
+        // Find a suitable tab for content script injection
+        let targetTabId = activeContentScriptTabId;
+
+        // Check if current target is valid (not an extension page)
+        if (targetTabId) {
+          try {
+            const tab = await chrome.tabs.get(targetTabId);
+            if (tab.url?.startsWith('chrome://') || tab.url?.startsWith('chrome-extension://')) {
+              console.log('[Background] Current tab is extension/chrome page, finding alternative...');
+              targetTabId = null;
+            }
+          } catch (e) {
+            console.log('[Background] Could not get tab info, finding alternative...');
+            targetTabId = null;
+          }
+        }
+
+        // If no valid tab, find a regular webpage tab
+        if (!targetTabId) {
+          const tabs = await chrome.tabs.query({ currentWindow: true });
+          const webpageTab = tabs.find(t =>
+            t.id &&
+            t.url &&
+            !t.url.startsWith('chrome://') &&
+            !t.url.startsWith('chrome-extension://') &&
+            (t.url.startsWith('http://') || t.url.startsWith('https://'))
+          );
+
+          if (webpageTab?.id) {
+            targetTabId = webpageTab.id;
+            activeContentScriptTabId = targetTabId;
+            console.log('[Background] Found alternative webpage tab:', targetTabId, webpageTab.url);
+          }
+        }
+
+        if (!targetTabId) {
+          console.error('[Background] No valid tab for MetaKeep operation');
+          sendResponse({ success: false, error: 'Please open the extension in a new tab (click Tab button) or have a webpage open.' });
           return;
         }
 
         // Ensure content script is injected and ready
         try {
-          await ensureContentScriptInjected(activeContentScriptTabId);
+          await ensureContentScriptInjected(targetTabId);
         } catch (error: any) {
           console.error('[Background] Content script injection failed:', error);
           sendResponse({ success: false, error: error.message });
@@ -311,8 +456,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         console.log(`[Background] Forwarding ${message.type} with appId:`, metakeepRequest.metakeepAppId, 'env:', metakeepRequest.metakeepEnv);
 
-        // Forward to content script in the tracked tab
-        chrome.tabs.sendMessage(activeContentScriptTabId, metakeepRequest, (response) => {
+        // Forward to content script in the target tab
+        chrome.tabs.sendMessage(targetTabId, metakeepRequest, (response) => {
           if (chrome.runtime.lastError) {
             console.error('[Background] Failed to forward to content script:', chrome.runtime.lastError);
             sendResponse({ success: false, error: chrome.runtime.lastError.message });
@@ -333,6 +478,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           message.type?.startsWith('CREATE_IDENTITY') ||
           message.type?.startsWith('GET_IDENTITY') ||
           message.type?.startsWith('GET_CREDENTIALS') ||
+          message.type?.startsWith('GET_DECRYPTED_CREDENTIALS') ||
           message.type?.startsWith('ISSUE_CREDENTIAL') ||
           message.type?.startsWith('VERIFY_CREDENTIAL') ||
           message.type?.startsWith('CREATE_PROOF') ||
