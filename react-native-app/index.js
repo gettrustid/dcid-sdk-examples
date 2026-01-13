@@ -10,7 +10,7 @@
  */
 
 // Import SDK polyfills shim
-import '../../src/polyfills/shim';
+import '../../dcid-sdk/src/polyfills/shim';
 
 import { AppRegistry } from 'react-native';
 import App from './src/App';

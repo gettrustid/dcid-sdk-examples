@@ -1,8 +1,8 @@
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 const path = require('path');
 
-// Get the SDK root directory (parent of examples folder)
-const sdkRoot = path.resolve(__dirname, '../..');
+// Get the SDK root directory (sibling repo)
+const sdkRoot = path.resolve(__dirname, '../../dcid-sdk');
 
 /**
  * Metro configuration

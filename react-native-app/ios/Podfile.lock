@@ -32,7 +32,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - MMKVCore (2.2.4)
-  - NitroMmkv (4.1.0):
+  - NitroMmkv (4.1.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -57,7 +57,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - NitroModules (0.32.0):
+  - NitroModules (0.32.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2093,8 +2093,8 @@ SPEC CHECKSUMS:
   MetaKeep: baf8a14f282c9d9ff9348f56d70023f10cc65483
   metakeep-react-native-sdk: fd6c354fbec3842c75b9548e8fa7449015c30abd
   MMKVCore: f2dd4c9befea04277a55e84e7812f930537993df
-  NitroMmkv: fa84b75972e4a464d31e42bc789a3ed24f42e893
-  NitroModules: c06fe17e0ed8407fe1a7135f0d14a9a6b8fe7419
+  NitroMmkv: dd3cb0579a327ba66b14cbc0825cb59f20667b73
+  NitroModules: 021ce2806593e7928aa94c60612affd176dbd950
   rapidsnark: da1c1d74a36ba8376700286d45707574d9d1afcb
   RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
   RCTDeprecation: ebe712bb05077934b16c6bf25228bdec34b64f83
