@@ -10,6 +10,8 @@ import IssueCredentialScreen from '../screens/IssueCredentialScreen';
 import ProofVerificationScreen from '../screens/ProofVerificationScreen';
 import RecoveryScreen from '../screens/RecoveryScreen';
 import BackupScreen from '../screens/BackupScreen';
+import SecurityScreen from '../screens/SecurityScreen';
+import TotpSetupScreen from '../screens/TotpSetupScreen';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -20,6 +22,8 @@ export type RootStackParamList = {
   ProofVerification: undefined;
   Recovery: undefined;
   Backup: undefined;
+  Security: undefined;
+  TotpSetup: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -89,6 +93,16 @@ export function AppNavigator() {
             name="Backup"
             component={BackupScreen}
             options={{ title: 'Backup Credentials' }}
+          />
+          <Stack.Screen
+            name="Security"
+            component={SecurityScreen}
+            options={{ title: 'Security' }}
+          />
+          <Stack.Screen
+            name="TotpSetup"
+            component={TotpSetupScreen}
+            options={{ title: 'Set Up Authenticator' }}
           />
         </>
       )}

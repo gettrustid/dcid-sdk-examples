@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function HomeScreen({ navigation }: Props) {
-  const { client, userEmail, hasIdentity, refreshAuthState } = useDCID();
+  const { client, userEmail, hasIdentity, refreshAuthState, hasPasskey, totpEnabled } = useDCID();
 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -161,6 +161,23 @@ export default function HomeScreen({ navigation }: Props) {
           )}
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[commonStyles.card, styles.actionCard]}
+          onPress={() => navigation.navigate('Security')}
+        >
+          <Text style={styles.cardIcon}>🛡️</Text>
+          <Text style={styles.cardTitle}>Security</Text>
+          <Text style={styles.cardDescription}>
+            Manage passkeys and authenticator app
+          </Text>
+          {(hasPasskey || totpEnabled) && (
+            <View style={styles.securityStatus}>
+              {hasPasskey && <Text style={styles.securityBadge}>Passkey</Text>}
+              {totpEnabled && <Text style={styles.securityBadge}>TOTP</Text>}
+            </View>
+          )}
+        </TouchableOpacity>
+
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>About DCID</Text>
           <Text style={styles.infoText}>
@@ -263,5 +280,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.gray700,
     lineHeight: 20,
+  },
+  securityStatus: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
+  securityBadge: {
+    backgroundColor: colors.success,
+    color: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+    overflow: 'hidden',
   },
 });
