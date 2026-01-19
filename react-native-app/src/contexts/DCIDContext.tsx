@@ -200,8 +200,8 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
     const tokens = await client.auth.passkey.completeAuthentication({ email }, result);
     console.log('[DCIDContext] Authentication completed');
 
-    // Login with tokens
-    await client.auth.login(tokens.accessToken, tokens.refreshToken);
+    // Login with tokens (pass email for identity creation)
+    await client.auth.login(tokens.accessToken, tokens.refreshToken, email);
     setUserEmail(email);
     await refreshAuthState();
   };
@@ -302,7 +302,8 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
     }
 
     const tokens = await client.auth.totp.completeAuth({ email }, code);
-    await client.auth.login(tokens.accessToken, tokens.refreshToken);
+    // Login with tokens (pass email for identity creation)
+    await client.auth.login(tokens.accessToken, tokens.refreshToken, email);
     setUserEmail(email);
     await refreshAuthState();
   };
