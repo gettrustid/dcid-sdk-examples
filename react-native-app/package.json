@@ -11,7 +11,7 @@
     "setup-circuits": "./scripts/setup-circuits.sh"
   },
   "dependencies": {
-    "@dcid/sdk": "file:../../dcid-sdk",
+    "@dcid/sdk": "^0.1.0",
     "@iden3/react-native-rapidsnark": "^0.0.1-beta.2",
     "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-navigation/native": "^6.1.18",

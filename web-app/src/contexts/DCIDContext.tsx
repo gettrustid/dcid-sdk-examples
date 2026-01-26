@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { DCIDClient, CircuitStorageInstance } from '@dcid/sdk';
-import { MetaKeep } from 'metakeep';
+import { MetaKeep } from '@dcid/sdk';
 
 interface DCIDContextType {
   client: DCIDClient | null;

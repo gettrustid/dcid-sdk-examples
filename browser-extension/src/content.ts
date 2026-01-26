@@ -3,7 +3,7 @@
  * Handles MetaKeep operations with UI popups visible to user
  */
 
-import { MetaKeep } from 'metakeep';
+import { MetaKeep } from '@dcid/sdk';
 
 console.log('[Content] Starting...');
 

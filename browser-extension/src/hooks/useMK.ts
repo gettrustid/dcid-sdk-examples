@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { MetaKeep } from 'metakeep';
+import { MetaKeep } from '@dcid/sdk';
 
 const METAKEEP_SIGNING_APP_ID = import.meta.env.VITE_DCID_SIGNING_APP_ID;
 const METAKEEP_ENCRYPTION_APP_ID = import.meta.env.VITE_DCID_ENCRYPTION_APP_ID;
