@@ -1,5 +1,8 @@
 """Test server for DCID Server Python SDK"""
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, status, Request, Header
