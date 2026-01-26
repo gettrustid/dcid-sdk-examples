@@ -277,13 +277,6 @@ All API calls are made from the background script, which has proper permissions.
 - MetaKeep manages private keys in HSM
 - Validate all messages from content scripts
 
-## Learn More
-
-- [DCID SDK Documentation](../../README.md)
-- [Extension Integration Guide](../../docs/EXTENSION_GUIDE.md)
-- [Chrome Extension Docs](https://developer.chrome.com/docs/extensions/)
-- [Manifest V3 Migration](https://developer.chrome.com/docs/extensions/mv3/intro/)
-
 ## License
 
 MIT

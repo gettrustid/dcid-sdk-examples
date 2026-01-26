@@ -173,7 +173,13 @@ function CredentialList() {
           loadCredentialsWithRetry(attempt + 1);
         }, 1000);
       } else {
-        setError(err.message || 'Failed to load credentials');
+        // Check for HSM/public key errors and show a friendlier message
+        const errorMsg = typeof err === 'object' ? (err.message || JSON.stringify(err)) : String(err);
+        if (errorMsg.toLowerCase().includes('hsm') || errorMsg.toLowerCase().includes('public key')) {
+          setError('Please wait about 30 seconds for the existing credentials to load.');
+        } else {
+          setError(errorMsg || 'Failed to load credentials');
+        }
         setLoading(false);
       }
     }

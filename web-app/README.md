@@ -228,12 +228,6 @@ Make sure your domain is whitelisted in the DCID dashboard.
 
 Ensure HTTPS is enabled (required for camera access). Use `https://localhost:3000` in development.
 
-## Learn More
-
-- [DCID SDK Documentation](../../README.md)
-- [Web App Integration Guide](../../docs/WEBAPP_GUIDE.md)
-- [Platform Adapters](../../PLATFORM_ADAPTERS.md)
-
 ## License
 
 MIT

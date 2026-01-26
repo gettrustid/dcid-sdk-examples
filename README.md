@@ -59,6 +59,27 @@ A cross-platform mobile application demonstrating:
 
 ---
 
+### 4. Backend Server Examples
+**Path:** `backend-server-examples/`
+
+Example backend servers demonstrating how to use the DCID Server SDK (`@dcid/server-sdk`) for server-side integration. Available in three languages:
+
+- **TypeScript** - Express.js server
+- **Python** - FastAPI server with Swagger UI
+- **Go** - net/http server
+
+**Features:**
+- OTP authentication endpoints
+- Identity management (encryption, issuer, IPFS, verification)
+- Analytics session tracking
+- Consistent API across all languages
+
+**Tech Stack:** Express.js / FastAPI / Go net/http
+
+[View Backend Server README](./backend-server-examples/README.md)
+
+---
+
 ## Quick Start
 
 Each example references the SDK locally via `"@dcid/sdk": "file:../../dcid-sdk"` in `package.json`, so you can test changes to the SDK immediately.
@@ -80,6 +101,8 @@ Each example references the SDK locally via `"@dcid/sdk": "file:../../dcid-sdk"`
    cd ../dcid-sdk-examples/browser-extension
    # or
    cd ../dcid-sdk-examples/react-native-app
+   # or
+   cd ../dcid-sdk-examples/backend-server-examples/typescript  # (or python, golang)
    ```
 
 3. **Install dependencies:**
@@ -264,23 +287,8 @@ To add features to examples:
 - On-the-go credential collection
 - Biometric-protected credentials
 
-## Contributing
-
-When adding new examples:
-
-1. Follow the existing structure
-2. Include comprehensive README
-3. Add `.env.example` file
-4. Use TypeScript
-5. Include error handling
-6. Document all features
-
-## Support
-
-- **Documentation**: [../docs/](../docs/)
-  - [Web App Guide](../docs/WEBAPP_GUIDE.md)
-  - [Extension Guide](../docs/EXTENSION_GUIDE.md)
-  - [Mobile Guide](../docs/MOBILE_GUIDE.md)
-- **Issues**: https://github.com/trustid/sdk/issues
-- **Email**: support@trustid.life
-
+### Backend Server
+- Server-side credential issuance
+- Backend authentication services
+- API gateway integration
+- Multi-language microservices

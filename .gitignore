@@ -5,10 +5,17 @@
 
 # Dependencies
 node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
 
 # Build outputs
 dist/
 build/
+
+# Go binaries
+backend-server-examples/golang/golang
 
 # IDE
 .idea/

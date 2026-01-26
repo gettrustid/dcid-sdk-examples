@@ -28,8 +28,8 @@ See [React Native Environment Setup](https://reactnative.dev/docs/environment-se
 ### 1. Build the SDK (Required First Step!)
 
 ```bash
-# From the repository root (trustid-sdk/)
-cd ../..
+# Navigate to the SDK directory and build it
+cd ../../dcid-sdk
 npm install
 npm run build
 ```
@@ -38,7 +38,7 @@ npm run build
 
 ```bash
 # Back to the example folder
-cd examples/react-native-app
+cd ../dcid-sdk-examples/react-native-app
 npm install
 ```
 
@@ -474,13 +474,6 @@ Run tests:
 ```bash
 npm test
 ```
-
-## Learn More
-
-- [DCID SDK Documentation](../../README.md)
-- [Mobile Integration Guide](../../docs/MOBILE_GUIDE.md)
-- [React Native Docs](https://reactnative.dev/docs/getting-started)
-- [React Navigation](https://reactnavigation.org/)
 
 ## License
 
