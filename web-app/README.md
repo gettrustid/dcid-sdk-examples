@@ -2,6 +2,10 @@
 
 Complete React application demonstrating all DCID SDK capabilities.
 
+## Demo
+
+<video src="../assets/web-app-demo.mp4" controls width="100%"></video>
+
 ## Features
 
 - **Authentication** - OTP-based email/phone authentication

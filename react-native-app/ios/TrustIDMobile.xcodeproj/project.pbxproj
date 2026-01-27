@@ -185,6 +185,8 @@
 			buildPhases = (
 				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
 				4AA895BF17A4DDF5DBE14F56 /* [CP-User] Copy ZK Circuits */,
+				0B43B0CED0D875895DADCABE /* [CP-User] Fix Module Maps for Xcode 26 */,
+				BCDA6F047EC172D22A4C4252 /* [CP-User] Extract XCFrameworks for Xcode 26 */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
@@ -292,6 +294,16 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TrustIDMobile/Pods-TrustIDMobile-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		0B43B0CED0D875895DADCABE /* [CP-User] Fix Module Maps for Xcode 26 */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Fix Module Maps for Xcode 26";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SRC=\"${PODS_ROOT}/Target Support Files\"\nDST=\"${PODS_CONFIGURATION_BUILD_DIR}\"\n\ncopy_module_files() {\n  local pod=\"$1\"\n  local mapfile=\"$2\"\n  mkdir -p \"${DST}/${pod}\"\n  cp \"${SRC}/${pod}/${pod}.modulemap\" \"${DST}/${pod}/${mapfile}\" 2>/dev/null || true\n  cp \"${SRC}/${pod}/${pod}-umbrella.h\" \"${DST}/${pod}/${pod}-umbrella.h\" 2>/dev/null || true\n}\n\ncopy_module_files \"NitroMmkv\" \"NitroMmkv.modulemap\"\ncopy_module_files \"NitroModules\" \"NitroModules.modulemap\"\ncopy_module_files \"metakeep-react-native-sdk\" \"metakeep_react_native_sdk.modulemap\"\ncopy_module_files \"rapidsnark\" \"rapidsnark.modulemap\"\ncopy_module_files \"react-native-passkey\" \"react_native_passkey.modulemap\"\ncopy_module_files \"react-native-rapidsnark\" \"react_native_rapidsnark.modulemap\"\n";
+		};
 		4AA895BF17A4DDF5DBE14F56 /* [CP-User] Copy ZK Circuits */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -323,6 +335,16 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		BCDA6F047EC172D22A4C4252 /* [CP-User] Extract XCFrameworks for Xcode 26 */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "[CP-User] Extract XCFrameworks for Xcode 26";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/MetaKeep/MetaKeep-xcframeworks.sh\"";
 		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -491,7 +513,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7GXAS4V5ZQ;
 				ENABLE_BITCODE = NO;
@@ -526,7 +548,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 7GXAS4V5ZQ;
 				INFOPLIST_FILE = TrustIDMobile/Info.plist;

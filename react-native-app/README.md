@@ -2,6 +2,14 @@
 
 Complete React Native application demonstrating DCID SDK integration for iOS and Android.
 
+## Demo
+
+### App Walkthrough
+<video src="../assets/react-native-demo.mp4" controls width="100%"></video>
+
+### Passkey Authentication
+<video src="../assets/passkey-mobile.mp4" controls width="100%"></video>
+
 ## Features
 
 - **Authentication** - OTP-based email authentication
@@ -60,6 +68,8 @@ See [ENVIRONMENT.md](./ENVIRONMENT.md) for detailed documentation of all variabl
 # Install CocoaPods dependencies
 cd ios && pod install && cd ..
 ```
+
+> **Important:** Always open `ios/TrustIDMobile.xcworkspace` in Xcode, **not** `TrustIDMobile.xcodeproj`. The workspace includes the Pods project which provides all native dependencies. Opening the `.xcodeproj` directly will cause linker errors.
 
 ### 5. Android Setup
 
@@ -389,13 +399,19 @@ npm start -- --reset-cache
 
 ### iOS Build Errors
 
-Clean and rebuild:
+Make sure you are opening `ios/TrustIDMobile.xcworkspace` (**not** `.xcodeproj`). Then clean and rebuild:
 
 ```bash
 cd ios
 rm -rf Pods Podfile.lock
 pod install
 cd ..
+```
+
+If the build still fails, clear Xcode's derived data:
+
+```bash
+rm -rf ~/Library/Developer/Xcode/DerivedData/TrustIDMobile-*
 ```
 
 ### Android Build Errors
@@ -425,9 +441,30 @@ Ensure WebView is properly configured:
 
 ### iOS
 
-1. Open `ios/TrustIDMobile.xcworkspace` in Xcode
-2. Select your development team
-3. Archive and upload to App Store
+1. Open `ios/TrustIDMobile.xcworkspace` in Xcode (**not** `.xcodeproj`)
+2. Select your development team in Signing & Capabilities
+3. Select the `TrustIDMobile` scheme and a physical device (or "Any iOS Device")
+4. Product → Archive
+5. Once the archive succeeds, distribute via App Store Connect
+
+#### Xcode 26 Archive Troubleshooting
+
+If Archive fails with module map or header-not-found errors after upgrading to Xcode 26:
+
+```bash
+# 1. Quit Xcode completely
+
+# 2. Clear derived data
+rm -rf ~/Library/Developer/Xcode/DerivedData/TrustIDMobile-*
+
+# 3. Re-install pods (ensures Podfile script phases are registered)
+cd ios && pod install && cd ..
+
+# 4. Re-open the workspace and retry Archive
+open ios/TrustIDMobile.xcworkspace
+```
+
+If you see `"unable to initiate PIF transfer session"`, quit Xcode, clear derived data, and reopen the workspace.
 
 ### Android
 

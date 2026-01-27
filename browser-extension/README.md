@@ -2,6 +2,10 @@
 
 Complete Chrome/Firefox extension demonstrating DCID SDK integration with Manifest V3.
 
+## Demo
+
+<video src="../assets/browser-extension-demo.mp4" controls width="100%"></video>
+
 ## Features
 
 - **Background Service Worker** - DCID SDK initialized in background for persistent state

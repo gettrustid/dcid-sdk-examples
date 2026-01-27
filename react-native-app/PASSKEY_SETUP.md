@@ -1,4 +1,4 @@
-# Passkey Setup for DCID Mobile (iOS)
+# Passkey Setup for DCID Mobile Local Testing (iOS)
 
 This guide covers setting up passkey authentication using [react-native-passkey](https://www.npmjs.com/package/react-native-passkey).
 

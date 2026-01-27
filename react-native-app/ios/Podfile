@@ -5,7 +5,7 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, '15.0'
+platform :ios, '15.1'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -31,6 +31,40 @@ target 'TrustIDMobile' do
   # Copy ZK circuits to app bundle
   script_phase :name => 'Copy ZK Circuits',
     :script => 'cp -R "${PODS_ROOT}/../circuits" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/" 2>/dev/null || true',
+    :execution_position => :before_compile
+
+  # Extract XCFrameworks before compilation for Xcode 26.
+  # Xcode 26 may compile the app target before pod targets run their
+  # xcframework extraction scripts, so headers like <MetaKeep/MetaKeep.h>
+  # aren't found. Run the extraction scripts early from the app target.
+  script_phase :name => 'Extract XCFrameworks for Xcode 26',
+    :script => '"${PODS_ROOT}/Target Support Files/MetaKeep/MetaKeep-xcframeworks.sh"',
+    :execution_position => :before_compile
+
+  # Fix module maps not found during Xcode 26 Archive builds.
+  # Xcode 26 runs ScanDependencies before pod targets build their products,
+  # so module maps referenced via PODS_CONFIGURATION_BUILD_DIR don't exist yet.
+  # This copies them from Pods/Target Support Files/ ahead of compilation.
+  script_phase :name => 'Fix Module Maps for Xcode 26',
+    :script => <<~'SCRIPT',
+      SRC="${PODS_ROOT}/Target Support Files"
+      DST="${PODS_CONFIGURATION_BUILD_DIR}"
+
+      copy_module_files() {
+        local pod="$1"
+        local mapfile="$2"
+        mkdir -p "${DST}/${pod}"
+        cp "${SRC}/${pod}/${pod}.modulemap" "${DST}/${pod}/${mapfile}" 2>/dev/null || true
+        cp "${SRC}/${pod}/${pod}-umbrella.h" "${DST}/${pod}/${pod}-umbrella.h" 2>/dev/null || true
+      }
+
+      copy_module_files "NitroMmkv" "NitroMmkv.modulemap"
+      copy_module_files "NitroModules" "NitroModules.modulemap"
+      copy_module_files "metakeep-react-native-sdk" "metakeep_react_native_sdk.modulemap"
+      copy_module_files "rapidsnark" "rapidsnark.modulemap"
+      copy_module_files "react-native-passkey" "react_native_passkey.modulemap"
+      copy_module_files "react-native-rapidsnark" "react_native_rapidsnark.modulemap"
+    SCRIPT
     :execution_position => :before_compile
 
   post_install do |installer|
