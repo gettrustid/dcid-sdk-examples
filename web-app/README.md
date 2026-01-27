@@ -4,7 +4,7 @@ Complete React application demonstrating all DCID SDK capabilities.
 
 ## Demo
 
-<video src="../assets/web-app-demo.mp4" controls width="100%"></video>
+https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/web-app-demo.mp4
 
 ## Features
 
