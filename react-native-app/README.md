@@ -6,11 +6,11 @@ Complete React Native application demonstrating DCID SDK integration for iOS and
 
 ### App Walkthrough
 
-https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/react-native-demo.mp4
+<video src="https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/react-native-demo.mp4" controls="controls"></video>
 
 ### Passkey Authentication
 
-https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/passkey-mobile.mp4
+<video src="https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/passkey-mobile.mp4" controls="controls"></video>
 
 ## Features
 

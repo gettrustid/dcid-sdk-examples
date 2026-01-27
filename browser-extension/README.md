@@ -4,7 +4,7 @@ Complete Chrome/Firefox extension demonstrating DCID SDK integration with Manife
 
 ## Demo
 
-https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/browser-extension-demo.mp4
+<video src="https://github.com/gettrustid/dcid-sdk-examples/raw/master/assets/browser-extension-demo.mp4" controls="controls"></video>
 
 ## Features
 
