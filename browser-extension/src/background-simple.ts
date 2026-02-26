@@ -18,7 +18,8 @@ async function initializeDCID() {
     config: {
       appId: import.meta.env.VITE_DCID_SIGNING_APP_ID,
       appIdEncryption: import.meta.env.VITE_DCID_ENCRYPTION_APP_ID,
-      env: 'prod',
+      env: (import.meta.env.VITE_DCID_SIGNING_ENV as 'prod' | 'dev') || 'prod',
+      envEncryption: (import.meta.env.VITE_DCID_ENCRYPTION_ENV as 'prod' | 'dev') || 'dev',
     },
     apiUrl: import.meta.env.VITE_DCID_API_URL || 'your-backend-url',
   });

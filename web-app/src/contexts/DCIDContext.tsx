@@ -95,8 +95,8 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
           config: {
             appId: import.meta.env.VITE_DCID_SIGNING_APP_ID,
             appIdEncryption: import.meta.env.VITE_DCID_ENCRYPTION_APP_ID,
-            env: 'prod', // Match extension - hardcode to prod
-            envEncryption: 'dev' // Encryption uses dev
+            env: (import.meta.env.VITE_DCID_SIGNING_ENV as 'prod' | 'dev') || 'prod',
+            envEncryption: (import.meta.env.VITE_DCID_ENCRYPTION_ENV as 'prod' | 'dev') || 'dev',
           },
           apiUrl: import.meta.env.VITE_DCID_API_URL
         });
