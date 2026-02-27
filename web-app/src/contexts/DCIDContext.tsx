@@ -98,7 +98,8 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
             env: (import.meta.env.VITE_DCID_SIGNING_ENV as 'prod' | 'dev') || 'prod',
             envEncryption: (import.meta.env.VITE_DCID_ENCRYPTION_ENV as 'prod' | 'dev') || 'dev',
           },
-          apiUrl: import.meta.env.VITE_DCID_API_URL
+          apiUrl: import.meta.env.VITE_DCID_API_URL,
+          wsUrl: import.meta.env.VITE_DCID_WS_URL,
         });
 
         await dcidClient.initialize();

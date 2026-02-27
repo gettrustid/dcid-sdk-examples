@@ -65,7 +65,7 @@ function CredentialList() {
   const [docVerificationValues, setDocVerificationValues] = useState(DEFAULT_DOCUMENT_VERIFICATION);
 
   const apiBaseUrl = import.meta.env.VITE_DCID_API_URL || 'https://dev.trustid.life/api';
-  const wsBaseUrl = import.meta.env.VITE_DCID_WS_URL || 'wss://dev-identity.trustid.life/ws';
+  const wsBaseUrl = import.meta.env.VITE_DCID_WS_URL || '';
 
   const MAX_AUTO_RETRIES = 2;
 

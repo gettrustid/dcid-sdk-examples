@@ -340,7 +340,7 @@ export function DCIDProvider({ children }: { children: React.ReactNode }) {
             envEncryption: (DCID_ENCRYPTION_ENV as 'prod' | 'dev') || 'dev',
           },
           apiUrl: DCID_API_URL || 'https://dev.trustid.life/api',
-          wsUrl: DCID_WS_URL || 'wss://dev-identity.trustid.life/ws',
+          wsUrl: DCID_WS_URL,
         });
 
         // Set native MkHSM SDK BEFORE initialize

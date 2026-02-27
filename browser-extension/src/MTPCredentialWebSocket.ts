@@ -9,7 +9,7 @@ interface MTPCredentialResponse {
   message?: string;
 }
 
-const baseUrl = import.meta.env.VITE_WS_URL as string || 'wss://dev-identity.trustid.life/ws';
+const baseUrl = import.meta.env.VITE_WS_URL as string || import.meta.env.VITE_DCID_WS_URL as string || '';
 
 export class MTPCredentialWebSocket {
   private centrifuge: Centrifuge | null = null;
