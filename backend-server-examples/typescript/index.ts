@@ -126,8 +126,8 @@ app.post("/api/auth/admin-login", async (req, res, next) => {
   }
 });
 
-// Client SDK calls: /api/auth/token/refresh
-app.post("/api/auth/token/refresh", async (req, res, next) => {
+// Client SDK calls: /api/auth/refresh-token
+app.post("/api/auth/refresh-token", async (req, res, next) => {
   try {
     const result = await sdk.auth.refreshToken(req.body);
     sdk.setTokens(result);

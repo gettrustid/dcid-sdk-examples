@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ProofGenerator, IdentityAPI } from '@dcid/sdk';
 import { useDCID } from '../contexts/DCIDContext';
+import { attachTokenRefreshInterceptors } from '../utils/tokenRefreshInterceptor';
 
 function VerifyTab() {
   const { client, userEmail } = useDCID();
@@ -48,6 +49,7 @@ function VerifyTab() {
 
       const apiUrl = import.meta.env.VITE_DCID_API_URL || '';
       const identityApi = new IdentityAPI(apiUrl);
+      attachTokenRefreshInterceptors(identityApi, client);
       const verifyResponse = await identityApi.verifySignIn(credentialType, accessToken || undefined);
       if (!verifyResponse?.iden3commUrl) {
         throw new Error('Failed to get verification request URL from API');

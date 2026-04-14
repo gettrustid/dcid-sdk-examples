@@ -61,7 +61,7 @@ The test server provides the following endpoints:
 - `POST /api/auth/sign-in/initiate` - Initiate sign-in with OTP
 - `POST /api/auth/sign-in/confirm` - Confirm OTP and get tokens
 - `POST /api/auth/admin-login` - Admin login
-- `POST /api/auth/token/refresh` - Refresh token
+- `POST /api/auth/refresh-token` - Refresh token
 
 ### Identity - Encryption
 - `POST /api/identity/generate-encrypted-key` - Generate encryption key

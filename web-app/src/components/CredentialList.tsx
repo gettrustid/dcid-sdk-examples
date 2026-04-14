@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDCID } from '../contexts/DCIDContext';
 import { IdentityAPI, MTPCredentialWebSocket, CredentialManager } from '@dcid/sdk';
 import type { Credential } from '@dcid/sdk';
+import { attachTokenRefreshInterceptors } from '../utils/tokenRefreshInterceptor';
 
 // Example credential types for testing
 const CREDENTIAL_TYPES = [
@@ -258,6 +259,7 @@ function CredentialList() {
 
       setRetryingClaimId(pending.claimId);
       const identityAPI = new IdentityAPI(apiBaseUrl);
+      if (client) attachTokenRefreshInterceptors(identityAPI, client);
       const offerResponse = await identityAPI.getCredentialOffer(pending.txId, pending.claimId, accessToken);
 
       if (offerResponse) {
@@ -330,6 +332,7 @@ function CredentialList() {
 
       // Step 1: Request credential issuance
       const identityAPI = new IdentityAPI(apiBaseUrl);
+      attachTokenRefreshInterceptors(identityAPI, client);
 
       // Build credential values based on type
       let values: Record<string, any>;

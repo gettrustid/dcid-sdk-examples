@@ -9,6 +9,7 @@ Example backend servers demonstrating how to use the DCID Server SDK in differen
 | TypeScript | Express.js | `typescript/` |
 | Python | FastAPI | `python/` |
 | Go | net/http | `golang/` |
+| PHP | Laravel | `php/` |
 
 ## Prerequisites
 
@@ -127,6 +128,31 @@ source .env && ./server
 
 ---
 
+## PHP (Laravel)
+
+### Requirements
+- PHP 8.2+
+- Composer
+
+### Setup & Run
+
+```bash
+cd php
+
+# Install dependencies
+composer install
+
+# Configure environment
+cp .env.example .env
+php artisan key:generate
+# Edit .env and add your DCID_API_KEY
+
+# Run the server
+php artisan serve --port=8080
+```
+
+---
+
 ## API Endpoints
 
 All servers expose the same endpoints:
@@ -197,5 +223,5 @@ The SDK connects to different backends based on `DCID_ENVIRONMENT`:
 
 | Environment | Backend URL |
 |-------------|-------------|
-| `dev` | `http://krakend.dev-external.trustid.life/api` |
+| `dev` | `https://krakend.dev-external.trustid.life/api` |
 | `prod` | `https://gateway.trustid.life/api` |
