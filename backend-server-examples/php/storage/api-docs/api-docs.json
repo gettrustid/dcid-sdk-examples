@@ -1,0 +1,857 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "DCID Server SDK - PHP/Laravel",
+        "description": "API endpoints for the DCID Server SDK Laravel example. Provides authentication, identity management, credential issuance/verification, data storage, and analytics.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/auth/sign-in/initiate": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Initiate OTP sign-in",
+                "description": "Sends a one-time password to the provided email or phone number.",
+                "operationId": "34b38b5d94f6d73007a00126ff58bdcb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully"
+                    }
+                }
+            }
+        },
+        "/api/auth/sign-in/confirm": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Confirm OTP sign-in",
+                "description": "Validates the OTP and returns authentication tokens.",
+                "operationId": "09b071fb99893147ec9432908145074d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentication successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/admin-login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Admin login",
+                "description": "Authenticates an admin user with email or phone.",
+                "operationId": "d2c52accb3e50180cb09a88e686cb9c9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Admin authentication successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "accessToken": {
+                                            "type": "string"
+                                        },
+                                        "refreshToken": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh-token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh access token",
+                "description": "Exchanges a refresh token for a new access token.",
+                "operationId": "fe837fb040e731e97c93745d919baae3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "refreshToken"
+                                ],
+                                "properties": {
+                                    "refreshToken": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/identity/generate-encrypted-key": {
+            "post": {
+                "tags": [
+                    "Identity - Encryption"
+                ],
+                "summary": "Generate an encrypted key",
+                "description": "Generates an encryption key for the specified DID.",
+                "operationId": "5a980d32b7241c7bae271efffa118a5d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did",
+                                    "ownerEmail"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "ownerEmail": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Encryption key generated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/get-encrypted-key": {
+            "post": {
+                "tags": [
+                    "Identity - Encryption"
+                ],
+                "summary": "Get an encrypted key",
+                "description": "Retrieves the encryption key for the specified DID.",
+                "operationId": "95c44494df7e61037a5668f548aa4ff2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Encryption key retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/issuer/issue-credential": {
+            "post": {
+                "tags": [
+                    "Identity - Issuer"
+                ],
+                "summary": "Issue a credential",
+                "description": "Issues a verifiable credential for the specified DID.",
+                "operationId": "83c479f0019b54773c210a740e6b209d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did",
+                                    "credentialName",
+                                    "values",
+                                    "ownerEmail"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "credentialName": {
+                                        "type": "string",
+                                        "example": "KYCAgeCredential"
+                                    },
+                                    "values": {
+                                        "type": "object",
+                                        "example": "{\"birthday\": 19900101}"
+                                    },
+                                    "ownerEmail": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Credential issued successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/issuer/get-credential-offer": {
+            "get": {
+                "tags": [
+                    "Identity - Issuer"
+                ],
+                "summary": "Get a credential offer",
+                "description": "Retrieves a credential offer by claim ID and transaction ID.",
+                "operationId": "e44ded52c6a839b95478cad4a609d515",
+                "parameters": [
+                    {
+                        "name": "claimId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "txId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Credential offer retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/ipfs/store-credential": {
+            "post": {
+                "tags": [
+                    "Identity - IPFS"
+                ],
+                "summary": "Store a credential",
+                "description": "Stores a credential for the specified DID.",
+                "operationId": "1df7fdeb4dc83d1f2b81c017f693e41b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did",
+                                    "credentialType",
+                                    "credential"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "credentialType": {
+                                        "type": "string",
+                                        "example": "KYCAgeCredential"
+                                    },
+                                    "credential": {
+                                        "type": "object"
+                                    },
+                                    "encrypted": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Credential stored"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/ipfs/retrieve-user-credential": {
+            "post": {
+                "tags": [
+                    "Identity - IPFS"
+                ],
+                "summary": "Retrieve a user credential",
+                "description": "Retrieves a specific credential type for the specified DID.",
+                "operationId": "5978094f57131536c36dbf83efefe849",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did",
+                                    "credentialType"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "credentialType": {
+                                        "type": "string",
+                                        "example": "KYCAgeCredential"
+                                    },
+                                    "includeCidOnly": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Credential retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/ipfs/get-all-user-credentials": {
+            "post": {
+                "tags": [
+                    "Identity - IPFS"
+                ],
+                "summary": "Get all user credentials",
+                "description": "Retrieves all stored credentials for the specified DID.",
+                "operationId": "0343869f71ae940f3224d9ca727f140c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "includeCredentialData": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "All credentials retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/get-all-user-credentials": {
+            "post": {
+                "tags": [
+                    "Identity - IPFS"
+                ],
+                "summary": "Get all user credentials",
+                "description": "Retrieves all credentials for the specified DID (alias for the ipfs endpoint).",
+                "operationId": "7856b6cbb5c0e29c3673a8f0d8d81ca8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "did"
+                                ],
+                                "properties": {
+                                    "did": {
+                                        "type": "string",
+                                        "example": "did:example:123"
+                                    },
+                                    "includeCredentialData": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "All credentials retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/verify/sign-in": {
+            "post": {
+                "tags": [
+                    "Identity - Verification"
+                ],
+                "summary": "Verify sign-in with credential",
+                "description": "Initiates a credential-based sign-in verification.",
+                "operationId": "88dfaa6d9502759f0f7e431ebc50d89e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "credentialName"
+                                ],
+                                "properties": {
+                                    "credentialName": {
+                                        "type": "string",
+                                        "example": "KYCAgeCredential"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Verification initiated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/verification/link-store": {
+            "get": {
+                "tags": [
+                    "Identity - Verification"
+                ],
+                "summary": "Get link store",
+                "description": "Retrieves link store data by ID.",
+                "operationId": "75f470303602773344fedc975f515e79",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Link store data retrieved"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Identity - Verification"
+                ],
+                "summary": "Post to link store",
+                "description": "Posts data to the link store for verification.",
+                "operationId": "d1d55f64283228b1a0ce85ac1d7f7def",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "thid",
+                                    "type",
+                                    "from",
+                                    "typ",
+                                    "body"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "thid": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "from": {
+                                        "type": "string"
+                                    },
+                                    "typ": {
+                                        "type": "string"
+                                    },
+                                    "body": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Link store updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/identity/verification/callback": {
+            "post": {
+                "tags": [
+                    "Identity - Verification"
+                ],
+                "summary": "Verification callback",
+                "description": "Handles the verification callback with session ID and token.",
+                "operationId": "abc5abe5ec58d05e6a0e4c4ed3ecb9be",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sessionId",
+                                    "token"
+                                ],
+                                "properties": {
+                                    "sessionId": {
+                                        "type": "string"
+                                    },
+                                    "token": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Verification callback processed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/analytics/start-session": {
+            "post": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Start an analytics session",
+                "description": "Starts a new analytics tracking session.",
+                "operationId": "76e88e2545a136eaaf03b6718001b6d9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "sessionId": {
+                                        "type": "string"
+                                    },
+                                    "userId": {
+                                        "type": "string"
+                                    },
+                                    "anonymousId": {
+                                        "type": "string"
+                                    },
+                                    "pageLocation": {
+                                        "type": "string",
+                                        "example": "https://example.com/home"
+                                    },
+                                    "extra": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Session started"
+                    }
+                }
+            }
+        },
+        "/api/analytics/end-session": {
+            "post": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "End an analytics session",
+                "description": "Ends an existing analytics tracking session.",
+                "operationId": "2bd074388e0b2b34e25af9372364770f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sessionId"
+                                ],
+                                "properties": {
+                                    "sessionId": {
+                                        "type": "string"
+                                    },
+                                    "endedAt": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "extra": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Session ended"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Enter the JWT token obtained from sign-in or admin-login",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication and token management"
+        },
+        {
+            "name": "Identity - Encryption",
+            "description": "Encryption key generation and retrieval"
+        },
+        {
+            "name": "Identity - Issuer",
+            "description": "Credential issuance and offers"
+        },
+        {
+            "name": "Identity - IPFS",
+            "description": "Credential storage and retrieval"
+        },
+        {
+            "name": "Identity - Verification",
+            "description": "Identity verification and callbacks"
+        },
+        {
+            "name": "Analytics",
+            "description": "Session analytics tracking"
+        }
+    ]
+}
